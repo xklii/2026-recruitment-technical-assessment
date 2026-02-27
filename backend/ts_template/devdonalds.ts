@@ -131,8 +131,8 @@ const add_entry = (type: string, name: string, extra: number|requiredItem[]) => 
 
 // [TASK 3] ====================================================================
 // Endpoint that returns a summary of a recipe that corresponds to a query name
-app.get("/summary", (req:Request, res:Request) => {
-  const name = req.query.name;
+app.get("/summary", (req:Request, res:Response) => {
+  const name = req.query.name as string;
   try {
     const result = summarise(name);
     res.json(result);
@@ -175,6 +175,8 @@ const summarise = (name: string) => {
     cookTime: currTime,
     ingredients:  ingredientsArray
   }
+
+  return res;
 };
 
 /**
@@ -201,8 +203,6 @@ const resolve = (resolveMap: Map<string, number>, currEntry: requiredItem, multi
     throw Error('Item is not a cookbook recipe');
   }
   return { }
-
-
 }
 
 // =============================================================================
