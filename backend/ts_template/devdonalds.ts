@@ -6,19 +6,31 @@ abstract class cookbookEntry {
   constructor(name: string) {
     this.name = name;
   }
+
+  abstract resolve(resolveMap: Map<string, number>, multiplier: number);
 }
 
 interface requiredItem {
   name: string;
   quantity: number;
 }
-
 class recipe extends cookbookEntry {
   requiredItems: requiredItem[];
 
   constructor(name: string, requiredItems: requiredItem[]) {
     super(name);
     this.requiredItems = requiredItems;
+  }
+
+  resolve(resolveMap: Map<string, number>, multiplier: number) {
+    for (const entry of this.requiredItems) {
+      const curr = cookbook.get(entry.name);
+      if (curr == undefined) {
+        throw Error('The item' + entry.name + 'cannot be found.');
+      }
+      curr.resolve(resolveMap, multiplier * entry.quantity);
+    }
+    return { }
   }
 
 }
@@ -30,7 +42,13 @@ class ingredient extends cookbookEntry {
     super(name);
     this.cookTime = cookTime;
   }
-
+  resolve(resolveMap: Map<string, number>, multiplier: number) {
+    if (resolveMap.get(this.name) === undefined) {
+          resolveMap.set(this.name, 0 + multiplier);
+        } else {
+          resolveMap.set(this.name, resolveMap.get(this.name) + multiplier);
+        }
+  }
 }
 
 // =============================================================================
@@ -155,9 +173,7 @@ const summarise = (name: string) => {
   // name, quantity pair
   let resolvedIngredients = new Map<string, number>();
 
-  for (const entry of baseRecipe.requiredItems) {
-    resolve(resolvedIngredients, entry, entry.quantity);
-  }
+  baseRecipe.resolve(resolvedIngredients, 1);
   
   // now using the map, calculate actual cooktime
   let currTime = 0;
