@@ -187,7 +187,11 @@ const resolve = (resolveMap: Map<string, number>, currEntry: requiredItem, multi
   }
 
   if (curr instanceof ingredient) {
-    resolveMap.set(curr.name, (resolveMap.get(curr.name) || 0) + multiplier);
+    if (resolveMap.get(curr.name) === undefined) {
+      resolveMap.set(curr.name, 0 + multiplier);
+    } else {
+      resolveMap.set(curr.name, resolveMap.get(curr.name) + multiplier);
+    }
   } else if (curr instanceof recipe) {
     for (const entry of curr.requiredItems) {
       resolve(resolveMap, entry, multiplier * entry.quantity);
