@@ -4,9 +4,11 @@
     "start": "ts-node devdonalds.ts"
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "jest": "^30.2.0"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.13.1",
     "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
