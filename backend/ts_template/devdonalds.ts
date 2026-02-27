@@ -20,6 +20,7 @@ class recipe extends cookbookEntry {
     super(name);
     this.requiredItems = requiredItems;
   }
+
 }
 
 class ingredient extends cookbookEntry {
@@ -29,6 +30,7 @@ class ingredient extends cookbookEntry {
     super(name);
     this.cookTime = cookTime;
   }
+
 }
 
 // =============================================================================
@@ -141,26 +143,63 @@ app.get("/summary", (req:Request, res:Request) => {
 
 const summarise = (name: string) => {
   // algo: take recipe and recursively determine base ingredients + decompose nested recipes
-
   if (!cookbook.has(name)) {
     throw Error('The item' + name + 'cannot be found.');
   } 
-
-  const baseRecipe = cookbook[name];
-  if (baseRecipe instanceof ingredient) {
+  if (cookbook.get(name) instanceof ingredient) {
     throw Error(name + 'is an ingredient.');
   }
 
+  const baseRecipe = cookbook.get(name) as recipe;
 
+  // name, quantity pair
+  let resolvedIngredients = new Map<string, number>();
 
+  for (const entry of baseRecipe.requiredItems) {
+    resolve(resolvedIngredients, entry, entry.quantity);
+  }
+  
+  // now using the map, calculate actual cooktime
+  let currTime = 0;
+  for (const [key, value] of resolvedIngredients) {
+    const currIngredient = ingredients.get(key);
+    currTime += currIngredient.cookTime * value;
+  }
+  // maps the map into the required list
+  const ingredientsArray = Array.from(resolvedIngredients, ([name, quantity]) => ({
+    name, quantity
+  }));
 
-
-  /**
-   * A recipe with the corresponding name cannot be found.
-   * The searched name is NOT a recipe name (ie. an ingredient).
-   * The recipe contains recipes or ingredients that aren't in the cookbook.
-   */
+  const res = {
+    name: name,
+    cookTime: currTime,
+    ingredients:  ingredientsArray
+  }
 };
+
+/**
+ * Multiplier accumulates to the total of an ingredient used, nested within any number of recipes.
+ */
+const resolve = (resolveMap: Map<string, number>, currEntry: requiredItem, multiplier: number) => {
+  const curr = cookbook.get(currEntry.name);
+  if (curr == undefined) {
+    throw Error('The item' + currEntry.name + 'cannot be found.');
+  }
+
+  if (curr instanceof ingredient) {
+    resolveMap.set(curr.name, (resolveMap.get(curr.name) || 0) + multiplier);
+  } else if (curr instanceof recipe) {
+    for (const entry of curr.requiredItems) {
+      resolve(resolveMap, entry, multiplier * entry.quantity);
+    }
+  } else {
+    // this shouldnt throw ever
+    throw Error('Item is not a cookbook recipe');
+  }
+  return { }
+
+
+}
 
 // =============================================================================
 // ==== DO NOT TOUCH ===========================================================
