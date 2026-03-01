@@ -18,3 +18,10 @@ spec:
         image: deluan/navidrome:latest
         ports:
           - containerPort: 4533
+        volumeMounts:
+        - name: navidrome-data
+          mountPath: /data
+      volumes:
+      - name: navidrome-data
+        persistentVolumeClaim: 
+          claimName: navidrome
