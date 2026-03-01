@@ -20,7 +20,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 
 # for curl
-# ENV HOST=0.0.0.0
+ENV HOST=0.0.0.0
 ENV PORT=3000
 EXPOSE 3000
 CMD [ "pnpm", "start" ]
