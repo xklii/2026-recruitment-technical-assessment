@@ -21,7 +21,13 @@ spec:
         volumeMounts:
         - name: navidrome-data
           mountPath: /data
+        - name: navidrome-music
+          mountPath: /music
       volumes:
       - name: navidrome-data
         persistentVolumeClaim: 
           claimName: navidrome
+      - name: navidrome-music
+        persistentVolumeClaim: 
+          claimName: navidrome
+
